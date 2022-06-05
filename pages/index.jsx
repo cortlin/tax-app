@@ -1,6 +1,18 @@
+import { useState, useEffect } from "react";
 import Head from "next/head";
+import Auth from "../components/Auth";
+import { supabase } from "../utils/supabase";
 
 export default function Home() {
+  const [session, setSession] = useState(null);
+  useEffect(() => {
+    setSession(supabase.auth.session());
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
+
   return (
     <div className="flex flex-col py-2">
       <div>
@@ -16,34 +28,20 @@ export default function Home() {
         </Head>
 
         <main className="flex flex-col items-center justify-center w-full flex-1 px-8 ">
-          <img src="/ff-logo.svg" alt="Forcefield logo" className="mt-8" />
+          {!session ? (
+            <div>
+              <img src="/ff-logo.svg" alt="Forcefield logo" className="mt-8" />
 
-          <h1 className="text-6xl font-bold mt-20 leading-tight">
-            <a className="text-black" href="/">
-              Create your account
-            </a>
-          </h1>
-
-          <form className="w-full mt-20">
-            <input
-              type="email"
-              name="email"
-              className=" bg-gray-100 block my-2 px-4 py-2 rounded w-full text-lg"
-              placeholder="Email Address"
-            />
-            <input
-              type="password"
-              name="password"
-              className="bg-gray-100 block my-2 px-4 py-2 rounded w-full text-lg "
-              placeholder="Password"
-            />
-            <input
-              type="submit"
-              value="Sign Up"
-              className="w-full my-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 
-              cursor-pointer transition-colors rounded text-white font-bold"
-            />
-          </form>
+              <h1 className="text-6xl font-bold mt-20 leading-tight">
+                <a className="text-black" href="/">
+                  Create your account
+                </a>
+              </h1>
+              <Auth className="mt-20 w-full" />
+            </div>
+          ) : (
+            <p>logged in!</p>
+          )}
         </main>
       </div>
     </div>
