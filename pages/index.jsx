@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Auth from "../components/Auth";
 import { supabase } from "../utils/supabase";
+import Onboarding from "../components/Onboarding";
 
 export default function Home() {
   const [session, setSession] = useState(null);

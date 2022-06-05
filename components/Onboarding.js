@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabase";
 
-export default function Account({ session }) {
+export default function Onboarding({ session }) {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState(null);
   const [website, setWebsite] = useState(null);
