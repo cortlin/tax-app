@@ -3,6 +3,7 @@ import Head from "next/head";
 import Auth from "../components/Auth";
 import { supabase } from "../utils/supabase";
 import Onboarding from "../components/Onboarding";
+import Dashboard from "./Dashboard";
 
 export default function Home() {
   const [session, setSession] = useState(null);
@@ -15,7 +16,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col py-8 min-h-full">
+    <div className="flex flex-col py-8 min-h-full bg-gray-50">
       <Head>
         <title>Forcefield Tax App</title>
         <link rel="icon" href="/favicon.ico" />
@@ -40,7 +41,10 @@ export default function Home() {
             <Auth className="mt-20 w-full" />
           </div>
         ) : (
-          <Onboarding />
+          <>
+            <Onboarding />
+            <Dashboard classes="mt-20" />
+          </>
         )}
       </main>
     </div>
