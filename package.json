@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^1.35.3",
+    "@withabound/node-sdk": "^1.2.0",
     "dotenv": "^16.0.1",
     "moment": "^2.29.3",
     "next": "latest",

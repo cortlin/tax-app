@@ -1,17 +1,73 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 import moment from "moment";
+import abound from "../utils/aboundConfig";
+import getUserData from "../utils/getUserData";
 
 const user = supabase.auth.user();
 
 const Dashboard = ({ classes }) => {
-  const [accountData, setAccountData] = useState([]);
-
   useEffect(() => {
-    getPlaidData();
+    getUserData();
   }, []);
 
-  const getPlaidData = async () => {
+  const getUserData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (!data.abound_id) {
+        const response = await fetch("/api/abound_create_user", {
+          method: "POST",
+          body: JSON.stringify({ emailAddress: user.email }),
+        });
+
+        const { data } = await response.json();
+        let { error } = await supabase
+          .from("profiles")
+          .update({ abound_id: data.userId })
+          .eq("id", user.id);
+
+        if (error) {
+          throw error;
+        }
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  return (
+    <div className="w-full">
+      <button
+        onClick={() => {
+          supabase.auth.signOut();
+        }}
+        className="bg-blue-600 float-right rounded-full text-white py-2 px-4 mt-4 shadow shadow-blue-600/20"
+      >
+        Log out
+      </button>
+      <div className={classes}>Welcome back 👋</div>
+      <div className="text-xl font-bold">{user.email}</div>
+      <Accounts />
+      <Transactions />
+    </div>
+  );
+};
+
+const Accounts = () => {
+  const [accountData, setAccountData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  window.onload = async () => {
+    getAccounts();
+    console.log("UseEffect Ran");
+  };
+
+  const getAccounts = async () => {
     const results = await fetch("/api/get_account", {
       method: "POST",
       headers: {
@@ -20,44 +76,48 @@ const Dashboard = ({ classes }) => {
       body: JSON.stringify({ userID: user.id }),
     });
     const data = await results.json();
-    console.log(data.accounts[0]);
     setAccountData(() => [data.accounts[0]]);
   };
 
   return (
-    <div className="w-full">
-      <h1 className={classes}>This is the dashboard!</h1>
+    <>
       <h2 className="text-xl mt-8">Accounts</h2>
-      {accountData.map((account, index) => (
-        <div
-          key={index}
-          className="border border-blue-200 mt-4 rounded-md px-4 py-4"
-        >
-          <h3 className=" font-bold text-2xl mb-6">{account.name}</h3>
-          <div className="flex flex-col gap-1">
-            <p>
-              <b>Available Balance:</b> ${account.balances.available}
-            </p>
-            <p>
-              <b>Current Balance:</b> ${account.balances.current}
-            </p>
-            <p>
-              <b>Account Type:</b> {account.subtype}
-            </p>
+      {accountData ? (
+        accountData.map((account, index) => (
+          <div
+            key={index}
+            className="border border-blue-200 mt-4 rounded-md px-4 py-4"
+          >
+            <h3 className=" font-bold text-2xl mb-6">{account.name}</h3>
+            <div className="flex flex-col gap-1">
+              <p>
+                <b>Available Balance:</b> ${account.balances.available}
+              </p>
+              <p>
+                <b>Current Balance:</b> ${account.balances.current}
+              </p>
+              <p>
+                <b>Account Type:</b> {account.subtype}
+              </p>
+            </div>
           </div>
-        </div>
-      ))}
-      <Transactions />
-    </div>
+        ))
+      ) : (
+        <div>Loading...</div>
+      )}
+    </>
   );
 };
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState(null);
   const [txType, setTxType] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [aboundData, setAboundData] = useState(null);
 
   useEffect(() => {
     getTransactions();
+    setLoading(false);
   }, []);
 
   const getTransactions = async () => {
@@ -69,10 +129,32 @@ const Transactions = () => {
     setTransactions(() => [data.latest_transactions]);
   };
 
+  const handleAbound = async (txData) => {
+    const { abound_id: aboundID } = await getUserData();
+    try {
+      const response = await abound.expenses.create(aboundID, [
+        {
+          amount: txData.amount,
+          description: txData.merchant_name,
+          date: txData.date,
+        },
+      ]);
+
+      if (response.error) {
+        throw error;
+      }
+
+      console.log(response);
+      setAboundData(() => [response]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="mt-8">
       <h2 className="text-2xl">Recent Transactions</h2>
-      {transactions &&
+      {transactions ? (
         transactions[0].map((tx, index) => {
           return (
             <div
@@ -116,12 +198,18 @@ const Transactions = () => {
                   defaultValue={tx.category[0]}
                 />
               </div>
-              <button className="bg-blue-600 rounded-full w-full text-white py-2 mt-4 shadow shadow-blue-600/20">
-                Save Expense
+              <button
+                onClick={() => handleAbound(tx)}
+                className="bg-blue-600 rounded-full w-full text-white py-2 mt-4 shadow shadow-blue-600/20"
+              >
+                Test Send to Abound
               </button>
             </div>
           );
-        })}
+        })
+      ) : (
+        <div>Loading...</div>
+      )}
     </div>
   );
 };

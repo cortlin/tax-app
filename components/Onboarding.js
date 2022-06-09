@@ -52,33 +52,6 @@ export default function Onboarding({ session }) {
     setLinkToken(data.link_token);
   };
 
-  async function updateProfile({ username, website, avatar_url }) {
-    try {
-      setLoading(true);
-      const user = supabase.auth.user();
-
-      const updates = {
-        id: user.id,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date(),
-      };
-
-      let { error } = await supabase.from("profiles").upsert(updates, {
-        returning: "minimal", // Don't return the value after inserting
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="flex flex-col justify-between h-full">
       <div>

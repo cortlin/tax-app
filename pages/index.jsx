@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Auth from "../components/Auth";
 import { supabase } from "../utils/supabase";
-import Onboarding from "../components/Onboarding";
 import Dashboard from "./Dashboard";
 
 export default function Home() {
@@ -41,10 +40,7 @@ export default function Home() {
             <Auth className="mt-20 w-full" />
           </div>
         ) : (
-          <>
-            <Onboarding />
-            <Dashboard classes="mt-20" />
-          </>
+          <Dashboard classes="mt-20" />
         )}
       </main>
     </div>
