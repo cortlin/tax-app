@@ -3,6 +3,8 @@ import Head from "next/head";
 import Auth from "../components/Auth";
 import { supabase } from "../utils/supabase";
 import Dashboard from "./Dashboard";
+import Layout from "../components/Layout";
+import FooterNav from "../components/FooterNav";
 
 export default function Home() {
   const [session, setSession] = useState(null);
@@ -26,23 +28,25 @@ export default function Home() {
           rel="stylesheet"
         />
       </Head>
+      <Layout>
+        <main className="flex flex-col items-center justify-center w-full flex-1">
+          {!session ? (
+            <div>
+              <img src="/ff-logo.svg" alt="Forcefield logo" className="mt-8" />
 
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-8 ">
-        {!session ? (
-          <div>
-            <img src="/ff-logo.svg" alt="Forcefield logo" className="mt-8" />
-
-            <h1 className="text-6xl font-bold mt-20 leading-tight">
-              <a className="text-black" href="/">
-                Create your account
-              </a>
-            </h1>
-            <Auth className="mt-20 w-full" />
-          </div>
-        ) : (
-          <Dashboard classes="mt-20" />
-        )}
-      </main>
+              <h1 className="text-6xl font-bold mt-20 leading-tight">
+                <a className="text-black" href="/">
+                  Create your account
+                </a>
+              </h1>
+              <Auth className="mt-20 w-full" />
+            </div>
+          ) : (
+            <Dashboard classes="mt-20" />
+          )}
+        </main>
+        <FooterNav />
+      </Layout>
     </div>
   );
 }
