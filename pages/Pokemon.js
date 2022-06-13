@@ -2,6 +2,8 @@ import { useState } from "react";
 
 export default function Pokemon() {
   const [pokemonName, setPokemonName] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   console.log(pokemonName);
   // Data
   // --------------------------------------------------------
