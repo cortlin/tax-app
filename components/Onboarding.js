@@ -64,16 +64,7 @@ export default function Onboarding({ session }) {
           secure, and automated!
         </p>
       </div>
-      <div>
-        {linkToken != null ? <Link linkToken={linkToken} /> : <></>}
-
-        <button
-          className="mt-4 bg-gray-200 px-4 py-1 rounded"
-          onClick={() => supabase.auth.signOut()}
-        >
-          Sign Out
-        </button>
-      </div>
+      <div>{linkToken != null ? <Link linkToken={linkToken} /> : <></>}</div>
     </div>
   );
 }
@@ -88,7 +79,7 @@ const Link = (props) => {
 
       let { error } = await supabase
         .from("profiles")
-        .update({ plaid_key: key })
+        .update({ plaid_key: key, first_login: false })
         .eq("id", user.id);
 
       if (error) {

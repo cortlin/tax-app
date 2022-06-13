@@ -3,10 +3,12 @@ import { supabase } from "../utils/supabase";
 import moment from "moment";
 import abound from "../utils/aboundConfig";
 import getUserData from "../utils/getUserData";
+import Onboarding from "../components/Onboarding";
 
 const user = supabase.auth.user();
 
 const Dashboard = ({ classes }) => {
+  const [userData, setUserData] = useState("");
   useEffect(() => {
     getUserData();
   }, []);
@@ -18,6 +20,8 @@ const Dashboard = ({ classes }) => {
         .select("*")
         .eq("id", user.id)
         .single();
+
+      setUserData(() => ({ ...data }));
 
       if (!data.abound_id) {
         const response = await fetch("/api/abound_create_user", {
@@ -41,18 +45,24 @@ const Dashboard = ({ classes }) => {
   };
 
   return (
-    <div className="w-full">
-      <button
-        onClick={() => {
-          supabase.auth.signOut();
-        }}
-        className="bg-blue-600 float-right rounded-full text-white py-2 px-4 mt-4 shadow shadow-blue-600/20"
-      >
-        Log out
-      </button>
-      <div className={classes}>Welcome back 👋</div>
-      <div className="text-xl font-bold">{user.email}</div>
-      <Transactions />
+    <div>
+      {userData.first_login == true ? (
+        <Onboarding />
+      ) : (
+        <div className="w-full">
+          <button
+            onClick={() => {
+              supabase.auth.signOut();
+            }}
+            className="bg-blue-600 float-right rounded-full text-white py-2 px-4 mt-4 shadow shadow-blue-600/20"
+          >
+            Log out
+          </button>
+          <div className={classes}>Welcome back 👋</div>
+          <div className="text-xl font-bold">{user.email}</div>
+          <Transactions />
+        </div>
+      )}
     </div>
   );
 };
